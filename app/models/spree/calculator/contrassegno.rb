@@ -22,7 +22,7 @@ module Spree
       perc = ca.preferred_percentuale
       min = ca.preferred_minimo
       amount = object.item_total
-      [min, amount*perc/100].max * ((100 + Spree::Config[:iva].to_f) / 100) 
+      [min, amount*perc/100].max * ((100 + Spree::Contrassegno::Config[:iva].to_f) / 100) 
     end
   end
 end

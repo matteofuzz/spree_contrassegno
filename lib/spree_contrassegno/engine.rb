@@ -1,3 +1,5 @@
+module Spree::Contrassegno; end
+
 module SpreeContrassegno
   class Engine < Rails::Engine
     engine_name 'spree_contrassegno'
@@ -22,13 +24,16 @@ module SpreeContrassegno
        
     initializer "spree.register.calculators" do |app|
       app.config.spree.calculators.shipping_methods += [ 
-          Calculator::Contrassegno]
-                                        
+          Spree::Calculator::Contrassegno]                                       
     end
     
     initializer "spree.register.payment_methods" do |app|
-       app.config.spree.payment_methods += [
-           PaymentMethod::Contrassegno ]
+      app.config.spree.payment_methods += [
+         Spree::PaymentMethod::Contrassegno ]
+    end
+     
+     initializer "spree.contrassegno.preferences", :before => :load_config_initializers do |app|
+       Spree::Contrassegno::Config = Spree::ContrassegnoConfiguration.new
      end
 
     config.to_prepare &method(:activate).to_proc
