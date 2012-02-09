@@ -39,7 +39,7 @@ Spree::Order.class_eval do
           false
         end
       end   
-      ### ADRIASHIP customization  
+      ### CONTRASSEGNO customization  
       order.create_contrassegno!
       ###
     end
@@ -53,7 +53,7 @@ Spree::Order.class_eval do
 
   # Creates a contrassegno adjustment
   def create_contrassegno! 
-    if self.payment_method.type == "PaymentMethod::Contrassegno"
+    if self.payment_method.type == "Spree::PaymentMethod::Contrassegno"
       spese_contrassegno = self.payment_method.calculator.compute(self)
       self.adjustments.create(:amount => spese_contrassegno, :source => self, :label => "Contrassegno", :mandatory => true) 
       # with contrassegno shipment borns ready
