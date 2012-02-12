@@ -6,12 +6,13 @@ Spree::Order.class_eval do
     event :next do
       transition :from => 'cart',     :to => 'address'
       transition :from => 'address',  :to => 'delivery'
-      transition :from => 'delivery', :to => 'payment'
+      transition :from => 'delivery', :to => 'payment', :if => :payment_required?
+      transition :from => 'delivery', :to => 'complete'
       transition :from => 'confirm',  :to => 'complete'
 
       # note: some payment methods will not support a confirm step
       transition :from => 'payment',  :to => 'confirm',
-                                      :if => Proc.new { Gateway.current && Gateway.current.payment_profiles_supported? }
+                                      :if => Proc.new { |order| order.payment_method && order.payment_method.payment_profiles_supported? }
 
       transition :from => 'payment', :to => 'complete'
     end
@@ -44,9 +45,14 @@ Spree::Order.class_eval do
       ###
     end
 
+    before_transition :to => ['delivery'] do |order|
+      order.shipments.each { |s| s.destroy unless s.shipping_method.available_to_order?(order) }
+    end
+
     after_transition :to => 'complete', :do => :finalize!
     after_transition :to => 'delivery', :do => :create_tax_charge!
-    after_transition :to => 'payment', :do => :create_shipment!
+    after_transition :to => 'payment',  :do => :create_shipment!
+    after_transition :to => 'resumed',  :do => :after_resume
     after_transition :to => 'canceled', :do => :after_cancel
 
   end
@@ -54,7 +60,7 @@ Spree::Order.class_eval do
   # Creates a contrassegno adjustment
   def create_contrassegno! 
     if self.payment_method.type == "Spree::PaymentMethod::Contrassegno"
-      spese_contrassegno = self.payment_method.calculator.compute(self)
+      spese_contrassegno = self.payment_method.compute(self)
       self.adjustments.create(:amount => spese_contrassegno, :source => self, :label => "Contrassegno", :mandatory => true) 
       # with contrassegno shipment borns ready
       self.shipment.ready
@@ -62,5 +68,5 @@ Spree::Order.class_eval do
       update_totals
     end
   end
-  
+
 end

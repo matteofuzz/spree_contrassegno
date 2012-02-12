@@ -21,11 +21,6 @@ module SpreeContrassegno
       end
       
     end
-       
-    initializer "spree.register.calculators" do |app|
-      app.config.spree.calculators.shipping_methods += [ 
-          Spree::Calculator::Contrassegno]                                       
-    end
     
     initializer "spree.register.payment_methods" do |app|
       app.config.spree.payment_methods += [
