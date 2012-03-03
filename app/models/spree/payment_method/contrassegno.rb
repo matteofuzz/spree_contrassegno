@@ -36,5 +36,9 @@ module Spree
       [min, amount*perc/100].max * ((100 + Spree::Contrassegno::Config[:iva].to_f) / 100) 
     end
     
+    def source_required?
+      false
+    end
+    
   end
 end
