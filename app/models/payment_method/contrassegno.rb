@@ -32,6 +32,9 @@ class PaymentMethod::Contrassegno < PaymentMethod
     true
   end
   
+  def source_required?
+    false
+  end
   
   private
   
