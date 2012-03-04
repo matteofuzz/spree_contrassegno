@@ -1,5 +1,8 @@
 Spree::Order.class_eval do
   
+  StateMachine::Machine.ignore_method_conflicts = true
+  Spree::Order.state_machines.clear
+  
   # order state machine (see http://github.com/pluginaweek/state_machine/tree/master for details) 
   state_machine :initial => 'cart', :use_transactions => false do
 
