@@ -37,11 +37,7 @@ Spree::Order.class_eval do
       begin
         order.process_payments!  
       rescue Spree::GatewayError
-        if Spree::Config[:allow_checkout_on_gateway_error]
-          true
-        else
-          false
-        end
+        !!Spree::Config[:allow_checkout_on_gateway_error]
       end   
       ### CONTRASSEGNO customization  
       order.create_contrassegno!
