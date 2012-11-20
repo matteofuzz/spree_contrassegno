@@ -2,7 +2,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_contrassegno'
-  s.version     = '0.1.0'
+  s.version     = '0.1.1'
   s.summary     = 'Spree payment via contrassegno, direct payment to courier'
   s.description = '...'
   s.required_ruby_version = '>= 1.8.7'
