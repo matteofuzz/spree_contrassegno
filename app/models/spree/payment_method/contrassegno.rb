@@ -2,6 +2,8 @@ module Spree
   class PaymentMethod::Contrassegno < PaymentMethod
   	preference :percentuale, :decimal, :default => 3.0
   	preference :minimo, :decimal, :default => 5.63
+  	
+  	attr_accessible :preferred_percentuale, :preferred_minimo
   
     def actions
       %w{capture void}

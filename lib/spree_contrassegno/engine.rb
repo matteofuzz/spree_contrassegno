@@ -22,11 +22,14 @@ module SpreeContrassegno
       
     end
     
-1
+    initializer "spree.register.payment_methods" do |app|
+      app.config.spree.payment_methods += [
+        Spree::PaymentMethod::Contrassegno ]
+    end
      
-     initializer "spree.contrassegno.preferences", :before => :load_config_initializers do |app|
-       Spree::Contrassegno::Config = Spree::ContrassegnoConfiguration.new
-     end
+    initializer "spree.contrassegno.preferences", :before => :load_config_initializers do |app|
+      Spree::Contrassegno::Config = Spree::ContrassegnoConfiguration.new
+    end
 
     config.to_prepare &method(:activate).to_proc
   end
