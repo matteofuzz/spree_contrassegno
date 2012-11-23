@@ -4,6 +4,6 @@
 # Examples
 #
 
-"1.0.0" => { :branch => :master }
+"1.1.x" => { :branch => :master }
 "0.70.x" => { :branch => "0-70-x" }
 
