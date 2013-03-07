@@ -60,11 +60,12 @@ Spree::Order.class_eval do
   def create_contrassegno! 
     if self.payment_method.type == "Spree::PaymentMethod::Contrassegno"
       spese_contrassegno = self.payment_method.compute(self)
-      self.adjustments.create(:amount => spese_contrassegno, :source => self, :label => "Contrassegno", :mandatory => true) 
+      self.adjustments.create({:amount => spese_contrassegno, :source => self, :label => "Contrassegno", :mandatory => true}, :without_protection => true) 
       # with contrassegno shipment borns ready
       self.shipment.ready
-      update_shipment_state   
-      update_totals
+      # update_shipment_state   
+      #       update_totals
+      self.update!
     end
   end
 
