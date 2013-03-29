@@ -8,7 +8,7 @@ Spree::Shipment.class_eval do
   def determine_state(order)
     return "pending" if self.inventory_units.any? {|unit| unit.backordered?}
     return "shipped" if state == "shipped"  
-    return "ready" if order.payment_method.type == "Spree::PaymentMethod::Contrassegno"
+    return "ready" if order.payments.map(&:payment_method).include? "Spree::PaymentMethod::Contrassegno"
     order.payment_state == "balance_due" ? "pending" : "ready"
   end
 end
