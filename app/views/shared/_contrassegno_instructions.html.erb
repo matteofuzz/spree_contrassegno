@@ -1,3 +1,3 @@
 <% if Spree::PaymentMethod.where(:type => "Spree::PaymentMethod::Contrassegno").first %>
-  <p id="contrassegno-instructions">In case of “contrassegno” payment will be charged additional <%= number_to_currency Spree::PaymentMethod.where(:type => "Spree::PaymentMethod::Contrassegno").first.compute(@order) %></p> 
+  <p id="contrassegno-instructions">In case of “contrassegno” payment will be charged additional <%= Spree::Money.new Spree::PaymentMethod.where(:type => "Spree::PaymentMethod::Contrassegno").first.compute(@order) %></p> 
 <% end %>

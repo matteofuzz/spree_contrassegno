@@ -1,2 +1,2 @@
 <%= t(:contrassegno_notice) %>
-<%= number_to_currency payment_method.compute(@order) %>
+<%= Spree::Money.new payment_method.compute(@order) %>
