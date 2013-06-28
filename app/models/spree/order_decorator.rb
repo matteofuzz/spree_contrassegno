@@ -1,75 +1,40 @@
-Spree::Order.class_eval do
+module Spree
+    Order.class_eval do
   
-  StateMachine::Machine.ignore_method_conflicts = true
-  Spree::Order.state_machines.clear
-  
-  # order state machine (see http://github.com/pluginaweek/state_machine/tree/master for details) 
-  state_machine :initial => 'cart', :use_transactions => false do
-
-    event :next do
-      transition :from => 'cart',     :to => 'address'
-      transition :from => 'address',  :to => 'delivery'
-      transition :from => 'delivery', :to => 'payment', :if => :payment_required?
-      transition :from => 'delivery', :to => 'complete'
-      transition :from => 'confirm',  :to => 'complete'
-
-      # note: some payment methods will not support a confirm step
-      transition :from => 'payment',  :to => 'confirm',
-                                      :if => Proc.new { |order| order.payment_method && order.payment_method.payment_profiles_supported? }
-
-      transition :from => 'payment', :to => 'complete'
-    end
-
-    event :cancel do
-      transition :to => 'canceled', :if => :allow_cancel?
-    end
-    event :return do
-      transition :to => 'returned', :from => 'awaiting_return'
-    end
-    event :resume do
-      transition :to => 'resumed', :from => 'canceled', :if => :allow_resume?
-    end
-    event :authorize_return do
-      transition :to => 'awaiting_return'
-    end
-
-    before_transition :to => 'complete' do |order|
+    def process_payments!
       begin
-        order.process_payments!  
-      rescue Spree::GatewayError
+        pending_payments.each do |payment|
+          break if payment_total >= total
+
+          payment.process!
+
+          if payment.completed?
+            self.payment_total += payment.amount
+          end
+        end
+        ### CONTRASSEGNO customization  
+        create_contrassegno!
+        ###
+      rescue Core::GatewayError
         !!Spree::Config[:allow_checkout_on_gateway_error]
-      end   
-      ### CONTRASSEGNO customization  
-      order.create_contrassegno!
-      ###
+      end
     end
 
-    before_transition :to => ['delivery'] do |order|
-      order.shipments.each { |s| s.destroy unless s.shipping_method.available_to_order?(order) }
+    # Creates a contrassegno adjustment
+    def create_contrassegno! 
+      if payment_method.type == "Spree::PaymentMethod::Contrassegno"
+        spese_contrassegno = payment_method.compute(self)
+        adjustments.create({:amount => spese_contrassegno, :source => self, :label => "Contrassegno", :mandatory => true}, :without_protection => true) 
+        # update_totals
+        update!
+        # correct amount of contrassegno payment
+        payment.update_attribute :amount, self.total
+        # with contrassegno shipment borns ready
+        shipment.update!(self)
+        # aggiorna shipment_state
+        update!
+      end
     end
-
-    after_transition :to => 'complete', :do => :finalize!
-    after_transition :to => 'delivery', :do => :create_tax_charge!
-    after_transition :to => 'payment',  :do => :create_shipment!
-    after_transition :to => 'resumed',  :do => :after_resume
-    after_transition :to => 'canceled', :do => :after_cancel
 
   end
-
-  # Creates a contrassegno adjustment
-  def create_contrassegno! 
-    if self.payment_method.type == "Spree::PaymentMethod::Contrassegno"
-      spese_contrassegno = self.payment_method.compute(self)
-      self.adjustments.create({:amount => spese_contrassegno, :source => self, :label => "Contrassegno", :mandatory => true}, :without_protection => true) 
-      # update_totals
-      self.update!
-      # correct amount of contrassegno payment
-      self.payment.update_attribute :amount, self.total
-      # with contrassegno shipment borns ready
-      self.shipment.update!(self)
-      # aggiorna shipment_state
-      self.update!
-    end
-  end
-
 end
