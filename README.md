@@ -3,9 +3,7 @@ SpreeContrassegno
 
 1-3-stable branch: tesed with  Spree 1-3-stable
 
-ATTENTION! This extension override order state machine !!! (I must find out another way...)
-
-Payment with contrassegno, direct payment to courier, incorporate his own compute method, at the moment only percentual on total order with a minimum import.
+Payment with contrassegno, direct payment to courier, incorporate his own compute method, at the moment only percent on total order with a minimum import.
 In admin / payments add the payment.
 In checkout at payment step the additional cost of contrassegno will be shown.
 
