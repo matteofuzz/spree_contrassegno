@@ -1,5 +1,6 @@
 # Override per il contrassegno    
 Spree::Shipment.class_eval do
+
   # Determines the appropriate +state+ according to the following logic:
   #
   # Se Contrassegno
@@ -9,15 +10,17 @@ Spree::Shipment.class_eval do
   #   pending    unless order is complete and +order.payment_state+ is +paid+
   #   shipped    if already shipped (ie. does not change the state)
   #   ready      all other cases
-  def determine_state(order)
-    if order.payment_method and order.payment_method.is_a?(Spree::PaymentMethod::Contrassegno)
+
+  def determine_state_with_payment_method_check(order)
+    if order.payments.first and order.payments.first.is_a?(Spree::PaymentMethod::Contrassegno)
       return 'shipped' if state == 'shipped'
-      'ready'
+      return 'ready'
     else
-      return 'pending' unless order.can_ship?
-      return 'pending' if inventory_units.any? &:backordered?
-      return 'shipped' if state == 'shipped'
-      order.paid? ? 'ready' : 'pending'
-    end
+      return determine_state_without_payment_method_check(order)
+    end  
   end
+  
+  alias_method_chain :determine_state, :payment_method_check
+
 end
+
